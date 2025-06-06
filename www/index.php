@@ -8,8 +8,9 @@
 <body>
     <h3 class="mt-1 ms-1">Форма отправки сообщений</h3>
     <?php
+    define('DR', $_SERVER['DOCUMENT_ROOT']);
     spl_autoload_register(function ($class_name) {
-        require_once __DIR__ . '/' . str_replace('\\', '/', $class_name) . '.php';
+        require_once DR . '/' . str_replace('\\', '/', $class_name) . '.php';
     });
     $form = new \classes\Form();
     if ($_SERVER['REQUEST_METHOD'] == 'POST'){
