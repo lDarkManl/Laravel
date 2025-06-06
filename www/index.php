@@ -9,7 +9,7 @@
     <h3 class="mt-1 ms-1">Форма отправки сообщений</h3>
     <?php
     spl_autoload_register(function ($class_name) {
-        require_once '/home/user/projects/dmitriy-gusev/www/' . str_replace('\\', '/', $class_name) . '.php';
+        require_once __DIR__ . '/' . str_replace('\\', '/', $class_name) . '.php';
     });
     $form = new \classes\Form();
     if ($_SERVER['REQUEST_METHOD'] == 'POST'){
