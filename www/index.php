@@ -1,33 +1,19 @@
-<!doctype html>
-<html lang="ru">
-<head>
-    <meta charset="utf-8">
-    <title></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin>
-</head>
-<body>
-    <h3 class="mt-1 ms-1">Форма отправки сообщений</h3>
-    <?php
-    define('DR', $_SERVER['DOCUMENT_ROOT']);
-    spl_autoload_register(function ($class_name) {
-        require_once DR . '/' . str_replace('\\', '/', $class_name) . '.php';
-    });
-    $form = new \classes\Form();
-    if ($_SERVER['REQUEST_METHOD'] == 'POST'){
-        if ($form->sendForm("d_gusev_04@mail.ru", $_POST)){
-            echo "<script>alert('Ваше письмо отправлено!')</script>";
-        } 
-        else{
-            echo "<script>alert('Произошла ошибка. Письмо не отправлено!')</script>";
-        }
-        
+<?php
+require_once $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . 'load-file.php';
+$request = new \classes\Request('EmailForm');
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST'){
+	if ($request->sendData('d_gusev_04@mail.ru', $_POST, $_SERVER)){
+        header('Location: complete.php');
+        exit;
     }
-    $form->addInput("name", "text", "ФИО");
-    $form->addInput("password", "password", "Пароль");
-    echo $form->getHtml();
-    
-    ?>
+    else{
+        echo 'Произошла ошибка. Письмо не отправлено!';
+    }
+	
+}
+$request->addField('input', 'name', 'Имя');
+$request->addField('textarea', 'pass', 'Текст');
+echo $request->showForm();
 
-</body>
-</html>
-
+?>

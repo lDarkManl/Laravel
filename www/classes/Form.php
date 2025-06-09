@@ -1,55 +1,41 @@
 <?php
 namespace classes;
 //Класс для работы с формой (создание и отправка)
-class Form
+abstract class Form
 {
-    protected $formData;
+    protected $formData = [];
 
-    public function __construct()
+    public function addInput($name, $placeholder = '', $required = false)
     {
-        $this->formData = [];
+        $requiredAttr = $required ? 'required' : '';
+        $inputData = [
+            'field' => 'input',
+            'name' => $name,
+            'placeholder' => $placeholder,
+            'requiredAttr' => $requiredAttr,
+        ];
+        $this->formData[] = $inputData;
     }
 
-    public function addInput($name, $type, $placeholder, $required = false)
-    {
-        $this->formData[] = [$name, $type, $placeholder, $required];
+    public function addTextarea($name, $placeholder = '', $required = false){
+        $requiredAttr = $required ? 'required' : '';
+        $inputData = [
+            'field' => 'textarea',
+            'name' => $name,
+            'placeholder' => $placeholder,
+            'requiredAttr' => $requiredAttr,
+        ];
+        $this->formData[] = $inputData;
     }
 
-    public function getHtml()
-    {
-        $html = '<form method="POST" class="ms-1">';
-
-        foreach ($this->formData as $inputData) {
-            list($name, $type, $placeholder, $required) = $inputData;
-            $requiredAttr = $required ? 'required' : '';
-
-            $html .= <<<HTML
-                <div class="input-group mb-3 mt-3 flex-column">
-                    <label class="form-label">$placeholder</label>
-                    <input name="$name" type="$type" placeholder="$placeholder" class="form-control w-25" $requiredAttr>
-                </div>
-            HTML;
+    public function render($tmp) {
+        if(file_exists('templates/'.$tmp.'.tpl.php')) {
+            ob_start();
+            require_once 'templates/'.$tmp.'.tpl.php';
+            return ob_get_clean();
         }
-
-            $html .= <<<HTML
-                <button type="submit" class="btn btn-primary">Отправить</button>
-                </form>
-            HTML;
-
-        return $html;
     }
 
-
-    public function sendForm($email, $data)   
-    {   $message = '';
-        foreach ($data as $key => $value) {
-            $message .= "$key: $value\n";
-        }
-
-        $headers = "From: no-reply@example.com\r\n";
-        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-
-        return mail($email, "Данные формы", $message, $headers);
-    }
+    public abstract function sendForm($to, $data);
 }
 ?>
