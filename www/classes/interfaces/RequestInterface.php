@@ -8,8 +8,8 @@ interface RequestInterface
 
     public function url(): string;
 
-    public function query(string $key = null, $default = null): string;
-    public function post(string $key = null, $default = null): string;
+    public function get(string $key = null, $default = ''): string;
+    public function post(string $key = null, $default = ''): string;
 
     public function all(): array;
 
