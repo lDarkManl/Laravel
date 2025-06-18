@@ -1,23 +1,30 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . 'autoload.php';
 
-$controller = new \src\IndexController();
-$response = $controller->action();
-?>
+use src\IndexController;
 
-<!doctype html>
-<html lang="ru">
+try {
+    $controller = new IndexController();
+} catch (\PDOException $e) {
+    echo $e->getMessage();
+    exit;
+}
+$view = $controller->action();
+
+?>
+<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="utf-8">
-    <title>Форма</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" 
-          rel="stylesheet"
-          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
-          crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"  rel="stylesheet">
+    <title>Заявки</title>
 </head>
 <body>
-<div class="container mt-5">
-    <?=$response; ?>
+
+<h1>Заявки</h1>
+
+<div id="table-container">
+    <?=$view->renderTable(); ?>
 </div>
+
 </body>
 </html>
