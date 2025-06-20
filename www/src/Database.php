@@ -13,7 +13,7 @@ class Database {
         }
     }
 
-    public function createTables() {
+    public function createTables(): void {
         $this->pdo->exec("CREATE TABLE IF NOT EXISTS statuses (
             id INT PRIMARY KEY AUTO_INCREMENT,
             name VARCHAR(50) NOT NULL
@@ -64,19 +64,13 @@ class Database {
         return $columns;
     }
 
-    public function getAll($table, $sortField = 'id', $sortOrder = 'ASC') {
+    public function getAll($table, $sortField = 'id', $sortOrder = 'ASC'): array {
         $sql = "SELECT `$table`.*, s.name AS status_name FROM `$table` LEFT JOIN statuses s ON `$table`.status_id = s.id ORDER BY `$sortField` $sortOrder";
         $stmt = $this->pdo->query($sql);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
-    public function getById($table, $id) {
-        $stmt = $this->pdo->prepare("SELECT * FROM `$table` WHERE id = ?");
-        $stmt->execute([$id]);
-        return $stmt->fetch(\PDO::FETCH_ASSOC);
-    }
-
-    public function add($table, array $data) {
+    public function add($table, array $data): bool {
         $keys = array_keys($data);
         $columns = '`' . implode('`, `', $keys) . '`';
         $placeholders = ':' . implode(', :', $keys);
@@ -87,7 +81,7 @@ class Database {
         return $stmt->execute();
     }
 
-    public function update($table, $id, array $data) {
+    public function update($table, $id, array $data): bool {
         $fields = "";
         foreach ($data as $key => $value) {
             $fields .= "`$key` = :$key, ";
@@ -101,7 +95,7 @@ class Database {
         return $stmt->execute();
     }
 
-    public function delete($table, $id) {
+    public function delete($table, $id): bool {
         $stmt = $this->pdo->prepare("DELETE FROM `$table` WHERE id = ?");
         return $stmt->execute([$id]);
     }

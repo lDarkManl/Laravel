@@ -20,7 +20,7 @@ class IndexController
         {
             $this->db = new Database(DB_HOST, DB_NAME, DB_USER, DB_PASS);
         } catch (\PDOException $e) {
-            throw \PDOException($e->getMessage(), 0, $e);
+            throw new \PDOException("Ошибка подключения к базе данных", 0, $e);
         }
     }
 
