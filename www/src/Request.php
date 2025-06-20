@@ -25,9 +25,11 @@ class Request
         return $this->getData[$key] ?? null;
     }
 
-    public function post($key): mixed
+    public function post($key = null): mixed
     {
-        return $this->postData[$key] ?? null;
+        if ($key)
+            return $this->postData[$key] ?? null;
+        return $this->postData;
     }
 
     public function isSetPost($key): bool
