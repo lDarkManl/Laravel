@@ -9,7 +9,13 @@ try {
     echo $e->getMessage();
     exit;
 }
-$view = $controller->action();
+try {
+    $view = $controller->action();
+} catch (\PDOException $e) {
+    echo $e->getMessage();
+    exit;
+}
+
 
 ?>
 <!DOCTYPE html>

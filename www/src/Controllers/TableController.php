@@ -49,7 +49,12 @@ class TableController
                 case 'add':
                     $fields = $this->request->post();
                     unset($fields['action']);
-                    $this->db->add($table, $fields);
+                    try{
+                        $this->db->add($table, $fields);
+                    }
+                    catch (\PDOException $e) {
+                        throw new \PDOException("Ошибка добавления в базу данных", 0, $e);
+                    }
                     break;
                 case 'update':
                     $id = $this->request->post('row_id');
