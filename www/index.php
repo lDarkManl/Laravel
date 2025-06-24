@@ -2,7 +2,7 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . 'autoload.php';
 
 use src\Controllers\IndexController;
-
+use src\QueryBuilders\Requests;
 try {
     $controller = new IndexController();
 } catch (\PDOException $e) {

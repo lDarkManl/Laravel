@@ -17,7 +17,7 @@
                 ?>
                 <th>
                     <a href="?table=<?= /** @var TYPE_NAME $table */
-                    $table ?>&sort=<?=$column ?>&order=<?= $newOrder ?>">
+                    $table ?>&sort=<?=$column ?>&order=<?= $newOrder ?>&page=<?=$page?>">
                         <?=ucfirst($column) ?>
                     </a>
                 </th>
@@ -37,10 +37,11 @@
                                 <input type="hidden" name="action" value="update">
                                 <input type="hidden" name="row_id" value="<?= $row['id'] ?>">
                                 <select name="status_id" onchange="this.form.submit()">
-                                    <?php foreach ($statuses as $id => $name): ?>
-                                        <option value="<?= $id ?>" <?= $id === $value ? 'selected' : '' ?>>
-                                            <?=$name ?>
+                                    <?php foreach ($statuses as $values): ?>
+                                        <option value="<?= $values['id'] ?>" <?= $values['id'] === $value ? 'selected' : '' ?>>
+                                            <?=$values['name'] ?>
                                         </option>
+
                                     <?php endforeach; ?>
                                 </select>
                             </form>
@@ -61,4 +62,8 @@
         <?php endforeach; ?>
         </tbody>
     </table>
+    <div class="pagination">
+        <a href="?table=<?=$table ?>&sort=<?=$column ?>&order=<?= $sortOrder ?>&page=<?=$page <= 1 ? 1 : $page - 1;?>"">Назад</a>
+        <a href="?table=<?=$table ?>&sort=<?=$column ?>&order=<?= $sortOrder ?>&page=<?=$page + 1?>"">Вперед</a>
+    </div>
 <?php endif; ?>

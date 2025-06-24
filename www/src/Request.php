@@ -32,9 +32,5 @@ class Request
         return $this->postData;
     }
 
-    public function isSetPost($key): bool
-    {
-        return isset($this->postData[$key]);
-    }
 
 }

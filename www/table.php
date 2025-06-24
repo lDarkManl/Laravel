@@ -1,5 +1,6 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . 'autoload.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . 'config.php';
 
 use src\Controllers\TableController;
 
@@ -28,9 +29,12 @@ try {
 
 <h1>Заявки</h1>
 
+
 <div id="table-container">
     <?=$view->renderTable(); ?>
 </div>
+
+
 
 </body>
 </html>
