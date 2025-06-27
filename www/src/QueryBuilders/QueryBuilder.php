@@ -53,6 +53,12 @@ abstract class QueryBuilder
         return $this;
     }
 
+    public function paginate(int $page, int $perPage): static
+    {
+        $this->limit($perPage)->offset(($page - 1) * $perPage);
+        return $this;
+    }
+
     public function leftJoin(string $table, string $first, string $operator, string $second, string $alias = null): static
     {
         $joinClause = "LEFT JOIN `$table`";
@@ -103,7 +109,7 @@ abstract class QueryBuilder
         return $this->sqlConnection->execute($sql, $this->bindings);
     }
 
-    public function makeSql(): string
+    protected function makeSql(): string
     {
         $sql = 'SELECT ' . implode(', ', $this->selectFields);
         $sql .= ' FROM `' . static::TABLE_NAME . '`';

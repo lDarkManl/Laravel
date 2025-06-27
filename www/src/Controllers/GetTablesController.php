@@ -8,7 +8,7 @@ use src\Request;
 use src\Metadatas\MetadataManager;
 use src\View;
 
-class IndexController
+class GetTablesController
 {
     protected Request $request;
     protected MetadataManager $metadata;
@@ -17,16 +17,27 @@ class IndexController
     {
         $this->request = new Request();
         try {
-            $db = new Database(DB_HOST, DB_NAME, DB_USER, DB_PASS);
+            $db = Database::getInstance(DB_HOST, DB_NAME, DB_USER, DB_PASS);
             $this->metadata = new MetadataManager($db);
         } catch (\PDOException $e) {
-            throw new \PDOException("Ошибка подключения к базе данных", 0, $e);
+            $this->request->setError('Ошибка подключения к бд');
         }
     }
 
-    public function action(): View
+    public function get(): View
     {
         $view = new View();
+
+        if ($this->request->getError())
+        {
+            $view->setParams([
+                'error' => $this->request->getError()
+            ]);
+            $this->request->setError('');
+
+            return $view;
+        }
+
         if (!$this->metadata->tablesExist()) {
             $view->setParams([
                 'error' => 'Таблицы ещё не созданы. Перейдите на страницу <a href="admin.php">admin</a> для их создания.'
@@ -34,6 +45,8 @@ class IndexController
             return $view;
         }
         $tables = $this->metadata->getTables();
+
+        $view->setTplName('tables');
 
         $view->setParams(['tables' => $tables]);
 

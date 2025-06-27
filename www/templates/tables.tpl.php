@@ -3,6 +3,7 @@
 <?php else: ?>
     <?php /** @var TYPE_NAME $tables */
     foreach ($tables as $table): ?>
-        <a href="table.php?table=<?=$table?>"><?=$table?></a>
+        <?php $url = 'http://' . $_SERVER['SERVER_NAME'] . DIRECTORY_SEPARATOR . $table; ?>
+        <a href="<?=$url?>"><?=$table?></a>
     <?php endforeach; ?>
 <?php endif; ?>

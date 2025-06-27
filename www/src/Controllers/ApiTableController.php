@@ -1,21 +1,21 @@
 <?php
+
 namespace src\Controllers;
 
 require_once $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . 'config.php';
 
 use src\Database;
-use src\Metadatas\MetadataManager;
-use src\Request as RequestData;
-use src\Models\Status;
-use src\Models\User;
-use src\Models\Request;
-use src\Models\Model;
-use src\View;
-use src\Forms\Form;
 use src\Forms\Fields\Input;
 use src\Forms\Fields\Select;
+use src\Forms\Form;
+use src\Models\Model;
+use src\Models\Request;
+use src\Models\Status;
+use src\Models\User;
+use src\Request as RequestData;
+use src\Json;
 
-class TableController
+class ApiTableController
 {
     protected RequestData $request;
     protected Database $db;
@@ -31,7 +31,7 @@ class TableController
         }
     }
 
-    public function requests(): View
+    public function requests(): Json
     {
         if ($this->request->isPost())
         {
@@ -41,7 +41,7 @@ class TableController
 
     }
 
-    public function users(): View
+    public function users(): Json
     {
         if ($this->request->isPost())
         {
@@ -50,36 +50,43 @@ class TableController
         return $this->get('users', new User());
     }
 
-    protected function get(string $table, Model $tableObj): View
+    protected function get(string $table, Model $tableObj): Json
     {
-        $view = new View();
+        $json = new Json();
         if ($this->request->getError())
         {
-            $view->setParams([
+            $json->setParams([
                 'error' => $this->request->getError()
             ]);
             $this->request->setError('');
 
-            return $view;
+            return $json;
         }
         $sortField = $this->request->get('sort') ?? 'id';
         $sortOrder = $this->request->get('order') ?? 'ASC';
-        $page = (int) ($this->request->get('page') ?? 1);
+        $page = (int) $this->request->get('page');
 
         if (!$tableObj->tablesExist()) {
-            $view->setParams([
+            $json->setParams([
+                'success' => false,
                 'error' => 'Таблицы ещё не созданы. Перейдите на страницу <a href="admin.php">admin</a> для их создания.'
             ]);
-            return $view;
+            return $json;
         }
 
-        $tableData = $tableObj->query()
+        $tableDataQuery = $tableObj->query()
             ->select(["$table.*", 's.name as status_name'])
             ->leftJoin('statuses', "`$table`.`status_id`", '=', '`s`.`id`', 's')
-            ->orderBy($sortField, $sortOrder)
-            ->limit(self::PAGINATION)
-            ->offset(($page - 1) * self::PAGINATION)
-            ->get();
+            ->orderBy($sortField, $sortOrder);
+
+        if ($page)
+        {
+            $tableDataQuery->paginate($page, self::PAGINATION);
+        }
+
+        $tableData = $tableDataQuery->get();
+
+
 
         $countRows = $tableObj->query()
             ->select(["count(*) as countRows"])
@@ -88,7 +95,7 @@ class TableController
         $countPages = ceil($countRows[0]['countRows'] / static::PAGINATION);
 
         if (empty($tableData) && $page > 1) {
-            header("Location:" . 'http://' . $_SERVER['SERVER_NAME'] . DIRECTORY_SEPARATOR . $table . "?sort=$sortField&order=$sortOrder&page=$countPages");
+            header("Location: $table?sort=$sortField&order=$sortOrder&page=1");
             exit;
         }
 
@@ -112,24 +119,21 @@ class TableController
         $actionField->setType('hidden');
         $form->addField($actionField);
 
-        $view->setTplName('table');
-
-        $view->setParams([
+        $json->setParams([
+            'success' => true,
             'sortField' => $sortField,
             'sortOrder' => $sortOrder,
             'table' => $table,
             'tableData' => $tableData,
             'statuses' => $statuses,
-            'columns' => $columns,
-            'form' => $form,
             'page' => $page,
             'countPages' => $countPages,
         ]);
 
-        return $view;
+        return $json;
     }
 
-    protected function post(string $table, Model $tableObj): View
+    protected function post(string $table, Model $tableObj): Json
     {
         $action = $this->request->post('action');
 
@@ -154,7 +158,13 @@ class TableController
         $id = $this->request->post('row_id');
         $statusId = $this->request->post('status_id');
         $tableRow = $tableObj->find($id);
-        $tableRow->update(['status_id' => $statusId]);
+        try{
+            $tableRow->update(['status_id' => $statusId]);
+        }
+        catch (\PDOException $e) {
+            $this->request->setError('Форма неправильно заполнена');
+        }
+
     }
 
     protected function delete($tableObj): void

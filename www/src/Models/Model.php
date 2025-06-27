@@ -27,17 +27,15 @@ abstract class Model
 
     public function create(array $attributes): static
     {
-        $model = new static();
-        $attributes = array_intersect_key($attributes, array_flip($model->fillable));
-        $id = static::query()->insert($attributes);
+        $attributes = array_intersect_key($attributes, array_flip($this->fillable));
+        $id = $this->query()->insert($attributes);
         return $this->find($id);
     }
 
     public function find($id): ?static
     {
-        $model = new static();
-        $data = static::query()
-            ->where($model->primaryKey, '=', $id)
+        $data = $this->query()
+            ->where($this->primaryKey, '=', $id)
             ->first();
         if ($data) {
             $instance = new static();
@@ -52,14 +50,14 @@ abstract class Model
     public function update(array $attributes): bool
     {
         $attributes = array_intersect_key($attributes, array_flip($this->fillable));
-        return static::query()
+        return $this->query()
             ->where($this->primaryKey, '=', $this->{$this->primaryKey})
             ->update($attributes);
     }
 
     public function delete(): bool
     {
-        return static::query()
+        return $this->query()
             ->where($this->primaryKey, '=', $this->{$this->primaryKey})
             ->delete();
     }

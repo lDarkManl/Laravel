@@ -9,7 +9,7 @@ class Database
     protected PDO $pdo;
     protected static $instance = null;
 
-    public function __construct(string $dbHost, string $dbName, string $dbUser, string $dbPass)
+    protected function __construct(string $dbHost, string $dbName, string $dbUser, string $dbPass)
     {
         try {
             $this->pdo = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPass);
@@ -38,11 +38,6 @@ class Database
     {
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute($params);
-    }
-
-    public function getPdo(): PDO
-    {
-        return $this->pdo;
     }
 
     public function lastInsertId(): string
