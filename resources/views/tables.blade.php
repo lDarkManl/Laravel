@@ -9,13 +9,14 @@
     <title>Document</title>
 </head>
 <body>
-@if (isset($error))
-    <div class="alert alert-danger">
-        {{ $error }}
-    </div>
+@if ($errors->any())
+    @foreach ($errors->all() as $error)
+        <p>{{ $error }}</p>
+        <button onClick="window.location.reload();">Назад</button>
+    @endforeach
 @else
     @foreach($tables as $table)
-        <a href="{{ route('table', $table) }}">{{ $table }}</a>
+        <a href="{{ route('web.' . $table . '.list') }}">{{ $table }}</a>
     @endforeach
 @endif
 </body>

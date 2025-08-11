@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email');
             $table->unsignedBigInteger('status_id');
-            $table->foreign('status_id')->references('id')->on('statuses');
+            $table->timestamps();
         });
     }
 
@@ -28,4 +28,3 @@ return new class extends Migration
         Schema::dropIfExists('profiles');
     }
 };
-

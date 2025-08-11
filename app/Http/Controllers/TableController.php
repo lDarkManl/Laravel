@@ -16,12 +16,90 @@ class TableController extends Controller
 
     public function get(Request $request, string $table)
     {
-        if ($this->isApi($request))
-        {
-            return $this->getJson($request, $table);
+        $modelClass = "App\\Models\\" . mb_substr(ucfirst($table), 0, -1);
+
+        if (!class_exists($modelClass)) {
+            abort(404, "Модель не найдена");
         }
 
-        return $this->getHtml($request, $table);
+        $model = new $modelClass();
+
+        if ($request->session()->has('error')) {
+            return view('table');
+        }
+
+        $sortField = $request->input('sort', 'id');
+        $sortOrder = $request->input('order', 'asc');
+        $page = $request->input('page', 1);
+
+        if (!$this->tableExists($model)) {
+            session(['error' => 'Таблицы еще не созданы. Перейдите на страницу admin для их создания']);
+        }
+
+        $query = $model->leftJoin('statuses as s', $model->getTable() . '.status_id', '=', 's.id');
+
+        $columns = array_map(function ($column) use ($model) {
+            return $model->getTable() . '.' . $column;
+        }, $model->getTableColumns());
+
+        $selectColumns = array_merge($columns, ['s.name as status_name']);
+
+        $paginator = $query->select($selectColumns)
+            ->orderBy($sortField, $sortOrder)
+            ->paginate($this->pagination, ['*'], 'page', $page);
+
+        $tableData = $paginator->items();
+
+        if (empty($tableData) and $page > 1)
+        {
+            return redirect()->to(route("table", [
+                'table' => $table,
+                'sort' => $sortField,
+                'order' => $sortOrder,
+                'page' => $paginator->lastPage()
+            ]));
+        }
+
+        $statuses = Status::all();
+
+        $formFields = [];
+
+        foreach ($model->getTableColumns() as $column) {
+            if ($column === 'id' || $column === 'status_id') continue;
+            $formFields[] = [
+                'name' => $column,
+                'label' => ucfirst($column),
+                'type' => 'text'
+            ];
+        }
+
+        if (in_array('status_id', $model->getTableColumns())) {
+            $formFields[] = [
+                'name' => 'status_id',
+                'type' => 'select',
+                'label' => 'Статус',
+                'options' => $statuses->pluck('name', 'id')->toArray()
+            ];
+        }
+
+        $formFields[] = [
+            'name' => 'action',
+            'type' => 'hidden',
+            'value' => 'add'
+        ];
+
+        return view('table', [
+            'sortField' => $sortField,
+            'sortOrder' => $sortOrder,
+            'table' => $table,
+            'tableData' => $tableData,
+            'statuses' => $statuses,
+            'columns' => $model->getTableColumns(),
+            'formFields' => $formFields,
+            'page' => $page,
+            'countPages' => $paginator->lastPage(),
+            'paginator' => $paginator,
+        ]);
 
     }
 
